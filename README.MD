@@ -101,7 +101,10 @@ open ~/Library/Logs/Claude
 ## 💡 Dicas de Ouro (Checklist)
 
 * **Sintaxe JSON:** No VS Code, verifique se não há erros de "End of file expected". O arquivo deve terminar com um fechamento de chave `}` limpo.
+* **Segurança SQL:** Se usar SQL Server local sem certificado SSL oficial, o parâmetro `TrustServerCertificate=true;` na string de conexão é obrigatório para evitar erros de handshake.
+* **Teste de Rede:** Use `nc -zv IP 1433` (macOS) ou `Test-NetConnection IP -Port 1433` (Windows) para garantir que o banco está alcançável.
 
+---
 ## 🤝 Contribuindo
 
 Formas de contribuir:
@@ -114,7 +117,4 @@ Formas de contribuir:
 Alexandre
 📧 alemiti@gmail.com
 ⌨️ com ❤️ por [@alemiti7]([https://github.com/alemiti7]) 😊
-* **Segurança SQL:** Se usar SQL Server local sem certificado SSL oficial, o parâmetro `TrustServerCertificate=true;` na string de conexão é obrigatório para evitar erros de handshake.
-* **Teste de Rede:** Use `nc -zv IP 1433` (macOS) ou `Test-NetConnection IP -Port 1433` (Windows) para garantir que o banco está alcançável.
-
 ---

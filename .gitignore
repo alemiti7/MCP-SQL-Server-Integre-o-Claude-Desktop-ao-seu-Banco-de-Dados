@@ -1,0 +1,23 @@
+# --- Segurança e Configurações ---
+# Não subir o ficheiro de configuração do Claude pois contém a sua string de conexão/passwords
+claude_desktop_config.json
+.env
+
+# --- Dependências ---
+node_modules/
+__pycache__/
+*.pyc
+
+# --- Logs ---
+*.log
+logs/
+
+# --- Sistema e IDEs ---
+.DS_Store
+.vscode/
+.idea/
+Thumbs.db
+
+# --- SQL de Teste ---
+# Opcional: Se não quiser subir os seus scripts de consulta privados
+# get_comandos.sql

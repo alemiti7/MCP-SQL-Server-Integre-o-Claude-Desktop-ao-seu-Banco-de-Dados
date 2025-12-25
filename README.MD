@@ -115,7 +115,7 @@ Formas de contribuir:
 
 📞 Contato
 Alexandre
-📧 alemiti@gmail.com
-[@alemiti7]([https://github.com/alemiti7]) 😊
+alemiti@gmail.com
+😊
 
 ---

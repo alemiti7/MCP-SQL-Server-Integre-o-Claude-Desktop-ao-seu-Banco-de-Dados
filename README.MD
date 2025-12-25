@@ -1,4 +1,4 @@
----
+
 # 🚀 MCP SQL Server: Integre o Claude Desktop ao seu Banco de Dados
 -- Claude SQL Bridge: Guia Definitivo para macOS & Windows
 

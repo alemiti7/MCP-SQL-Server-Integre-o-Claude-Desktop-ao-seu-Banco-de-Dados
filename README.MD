@@ -5,8 +5,6 @@
 **Última atualização**: Dezembro 2025  
 **SQL Server testado**: Microsoft SQL Server 2025 (RTM) Enterprise Developer Edition
 
-Aqui está a tradução dos requisitos de sistema para o português:
-
 ---
 
 ## **Requisitos de Sistema**

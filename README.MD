@@ -1,47 +1,58 @@
-
 # 🚀 MCP SQL Server: Integre o Claude Desktop ao seu Banco de Dados
--- Claude SQL Bridge: Guia Definitivo para macOS & Windows
 
-* Última atualização: Dezembro 2025
-* Versão do SQL Server testada: Microsoft SQL Server 2025 (RTM) Enterprise Developer Edition
+> **Claude SQL Bridge**: Guia Definitivo para macOS & Windows
 
+**Última atualização**: Dezembro 2025  
+**SQL Server testado**: Microsoft SQL Server 2025 (RTM) Enterprise Developer Edition
 
-Este guia fornece o passo a passo unificado para configurar o **Model Context Protocol (MCP)**, permitindo que o Claude Desktop execute consultas SQL diretamente em instâncias do **Microsoft SQL Server**.
-
-## 📋 1. Pré-requisitos (Ambos os Sistemas)
-
-* **Claude Desktop** instalado.
-* **Node.js (v18+)** instalado: Necessário para rodar o servidor MCP.
-* **SQL Server** acessível: Pode ser local, via Docker ou servidor remoto.
-* **Conectividade:** Certifique-se de que a porta **1433** está aberta no firewall.
+Este guia fornece o passo a passo para configurar o **Model Context Protocol (MCP)**, permitindo que o Claude Desktop execute consultas SQL diretamente em instâncias do **Microsoft SQL Server**.
 
 ---
 
-## 🛠️ 2. Instalação do Servidor MCP
+## 📋 Índice
 
-Abra o terminal (Terminal no macOS ou PowerShell/CMD no Windows) e instale o conector globalmente:
+- [Pré-requisitos](#-pré-requisitos)
+- [Instalação](#-instalação)
+- [Configuração](#-configuração)
+- [Executando Consultas](#-executando-consultas)
+- [Operações Suportadas](#-operações-suportadas)
+- [Limitações](#-limitações)
+- [Permissões e Segurança](#-permissões-e-segurança)
+- [Alternativas para Operações Restritas](#-alternativas-para-operações-restritas)
+- [Troubleshooting](#-troubleshooting)
+- [Contato](#-contato)
+
+---
+
+## 🎯 Pré-requisitos
+
+- **Claude Desktop** instalado
+- **Node.js (v18+)** instalado
+- **SQL Server** acessível (local, Docker ou remoto)
+- **Porta 1433** aberta no firewall
+
+---
+
+## 🛠️ Instalação
+
+Instale o conector MCP globalmente:
 
 ```bash
 npm install -g @modelcontextprotocol/server-mssql
-
 ```
 
-> **Dica:** Verifique o local de instalação do Node.js com o comando `which node` (macOS) ou `where node` (Windows) para usar no arquivo de configuração.
+> **Dica**: Use `which node` (macOS) ou `where node` (Windows) para verificar o caminho de instalação do Node.js.
 
 ---
 
-## ⚙️ 3. Configuração do Claude Desktop
+## ⚙️ Configuração
 
-O Claude Desktop utiliza um arquivo JSON para gerenciar os servidores. O conteúdo é o mesmo, mas o local do arquivo muda conforme o sistema:
+### 1. Localize o arquivo de configuração do Claude:
 
-### Caminho do Arquivo:
+- **macOS**: `~/Library/Application Support/Claude/claude_desktop_config.json`
+- **Windows**: `%APPDATA%\Claude\claude_desktop_config.json`
 
-* **macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
-* **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
-
-### Conteúdo do JSON:
-
-Copie e cole o código abaixo, ajustando os caminhos de acordo com seu usuário:
+### 2. Configure o MCP Server:
 
 ```json
 {
@@ -57,152 +68,96 @@ Copie e cole o código abaixo, ajustando os caminhos de acordo com seu usuário:
     }
   }
 }
-
 ```
 
-*No **macOS**, o caminho em `args` costuma ser `/usr/local/lib/node_modules/...` ou similar.*
+> **macOS**: O caminho em `args` geralmente é `/usr/local/lib/node_modules/...`
+
+### 3. Verificação de Logs:
+
+Se o ícone de ferramenta (🔨) não aparecer no Claude, verifique os logs:
+
+- **macOS**: `~/Library/Logs/Claude`
+- **Windows**: `%USERPROFILE%\AppData\Local\Logs\Claude`
+
+**Arquivos principais**:
+- `mcp-server-sql-server.log`: Erros de conexão SQL
+- `claude_desktop.log`: Erros de carregamento do MCP
 
 ---
 
-## 🔍 4. Verificação de Logs e Troubleshooting
+## 🚀 Executando Consultas
 
-Se o ícone de ferramenta (martelo) não aparecer no Claude, verifique os logs para diagnosticar erros de conexão ou sintaxe.
+1. **Reinicie o Claude Desktop**
+2. **Envie uma consulta**: "Mostre os top 5 produtos da tabela dbo.PRODUTOS"
+3. **Autorize o acesso**: Clique em "Permitir uma vez" ou "Sempre permitir"
+4. **Veja o resultado**: Dados formatados diretamente no chat
 
-### Como abrir a pasta de logs:
+### 💡 Checklist Rápido
 
-* **No macOS (Terminal):**
-```bash
-open ~/Library/Logs/Claude
-
-```
-
-
-* **No Windows (Executar/Win+R):**
-```text
-%USERPROFILE%\AppData\Local\Logs\Claude
-
-```
-
-
-
-**Arquivos principais:**
-
-* `mcp-server-sql-server.log`: Registra falhas de login ou erros de rede do SQL.
-* `claude_desktop.log`: Registra se o Claude conseguiu carregar o Node.js e o arquivo de configuração.
+- ✅ **Sintaxe JSON**: Verifique no VS Code se não há erros de sintaxe
+- ✅ **SSL**: Use `TrustServerCertificate=true;` para SQL Server local sem certificado oficial
+- ✅ **Teste de rede**: 
+  - macOS: `nc -zv IP 1433`
+  - Windows: `Test-NetConnection IP -Port 1433`
 
 ---
-
-## 🚀 5. Executando Consultas
-
-1. **Reinicie o Claude Desktop:** Essencial para carregar novas configurações.
-2. **Peça uma consulta:** "Claude, mostre os top 5 produtos da tabela dbo.PRODUTOS".
-3. **Autorize o Acesso:** Uma janela de segurança surgirá. Clique em **"Permitir uma vez"** ou **"Sempre permitir"**.
-4. **Resultado:** O Claude exibirá os dados formatados em tabela diretamente no chat.
-
----
-
-## 💡 Dicas de Ouro (Checklist)
-
-* **Sintaxe JSON:** No VS Code, verifique se não há erros de "End of file expected". O arquivo deve terminar com um fechamento de chave `}` limpo.
-* **Segurança SQL:** Se usar SQL Server local sem certificado SSL oficial, o parâmetro `TrustServerCertificate=true;` na string de conexão é obrigatório para evitar erros de handshake.
-* **Teste de Rede:** Use `nc -zv IP 1433` (macOS) ou `Test-NetConnection IP -Port 1433` (Windows) para garantir que o banco está alcançável.
-
----
-
-# Limitações do MCP SQL Server
-
-Este documento descreve as capacidades e limitações do Model Context Protocol (MCP) ao conectar-se com SQL Server através do Claude AI.
-
-## 📋 Índice
-
-- [Operações Suportadas](#operações-suportadas)
-- [Limitações](#limitações)
-- [Permissões e Segurança](#permissões-e-segurança)
-- [Exemplo de Análise de Permissões](#exemplo-de-análise-de-permissões)
-- [Alternativas para Operações Restritas](#alternativas-para-operações-restritas)
 
 ## ✅ Operações Suportadas
 
-### Consultas e Leitura de Dados
-
-- Execução de comandos `SELECT` em tabelas, views e funções
-- JOINs complexos e subconsultas
-- Consultas ao `INFORMATION_SCHEMA` e `sys.objects`
-- Execução de stored procedures de leitura
-- Uso de funções escalares e de tabela
+### Consultas e Leitura
+- SELECT, JOINs complexos, subconsultas
+- Consultas ao INFORMATION_SCHEMA e sys.objects
+- Stored procedures de leitura
+- Funções escalares e de tabela
 
 ### Modificações de Dados (DML)
-
-- `INSERT`, `UPDATE`, `DELETE`
-- `MERGE` e operações complexas de manipulação de dados
-- Gerenciamento de transações:
-  - `BEGIN TRANSACTION`
-  - `COMMIT`
-  - `ROLLBACK`
+- INSERT, UPDATE, DELETE, MERGE
+- Transações (BEGIN TRANSACTION, COMMIT, ROLLBACK)
 
 ### Definição de Dados (DDL)
-
-- `CREATE`, `ALTER`, `DROP` de:
-  - Tabelas
-  - Views
-  - Índices
-  - Stored procedures
-  - Functions
+- CREATE, ALTER, DROP de tabelas, views, índices
+- CREATE/ALTER stored procedures e functions
 - Gerenciamento de constraints e triggers
 
 ### Análise e Metadata
-
-- Consulta de estruturas de banco de dados
+- Consulta de estruturas de banco
 - Verificação de estatísticas e performance
-- Análise de planos de execução (`SET STATISTICS`)
-- Inspeção de schemas e objetos do banco
+- Análise de planos de execução (SET STATISTICS)
+
+---
 
 ## ❌ Limitações
 
-### 1. Operações de Arquivo
+### Operações de Arquivo (Não Suportadas)
 
-**Não suportado:**
-- `BACKUP DATABASE` / `RESTORE DATABASE` ⚠️ (mesmo com permissões adequadas)
-- Acesso ao sistema de arquivos do servidor
-- Comandos como `xp_cmdshell`
-- `OPENROWSET` com arquivos
-- Criação ou leitura de arquivos `.bak`, `.csv`, `.txt` no servidor
-- `BULK INSERT` de arquivos externos
-- Importação/exportação de dados para arquivos físicos
+- ❌ BACKUP DATABASE / RESTORE DATABASE (mesmo com permissões)
+- ❌ Acesso ao sistema de arquivos (xp_cmdshell, OPENROWSET)
+- ❌ BULK INSERT de arquivos externos
+- ❌ Importação/exportação para arquivos físicos
 
-> **Nota Importante**: Mesmo que o usuário possua as permissões `BACKUP DATABASE` e `BACKUP LOG`, o MCP não consegue executar comandos de backup porque eles requerem acesso ao sistema de arquivos do servidor, o que é uma **limitação da interface MCP**, não das permissões do usuário.
+> **Importante**: O MCP não pode executar comandos de backup porque requer acesso ao sistema de arquivos do servidor - isso é uma limitação da interface MCP, não das permissões.
 
-### 2. Operações de Sistema
+### Operações de Sistema (Limitadas)
 
-**Limitado ou não suportado:**
-- Gerenciamento completo de logins e usuários
-- Configurações de servidor (`sp_configure`)
-- Linked servers
-- Replicação e espelhamento de banco de dados
-- SQL Server Agent Jobs e agendamentos
+- ❌ Configurações de servidor (sp_configure)
+- ❌ Linked servers
+- ❌ Replicação e espelhamento
+- ❌ SQL Server Agent Jobs
 
-### 3. Limitações de Rede e Performance
+### Limitações Técnicas
 
-- **Timeout**: 15 segundos por consulta
-- Sem transferência de arquivos binários pela conexão
-- Sem acesso direto ao sistema de arquivos do servidor
-- Conexão TCP/IP na porta padrão 1433
+- ⏱️ **Timeout**: 15 segundos por consulta
+- 🚫 **Sem transferência de arquivos binários**
+- 🔌 **Conexão**: TCP/IP na porta 1433
 
-### 4. Comandos Administrativos Avançados
-
-**Restritos:**
-- Alguns comandos `DBCC` (manutenção avançada)
-- Operações que requerem permissões `sysadmin` específicas
-- Alterações em databases de sistema (`master`, `msdb`, `model`, `tempdb`)
+---
 
 ## 🔐 Permissões e Segurança
-
-As limitações dependem das **permissões do usuário** configurado na conexão MCP.
 
 ### Verificar Permissões Atuais
 
 ```sql
--- Ver todas as permissões do usuário atual
+-- Ver todas as permissões do usuário
 SELECT * FROM fn_my_permissions(NULL, 'DATABASE');
 
 -- Ver roles do usuário
@@ -213,328 +168,165 @@ FROM sys.database_role_members AS drm
 JOIN sys.database_principals AS r ON drm.role_principal_id = r.principal_id
 JOIN sys.database_principals AS m ON drm.member_principal_id = m.principal_id
 WHERE m.name = USER_NAME();
-
--- Ver o usuário atual
-SELECT USER_NAME() AS CurrentUser, SUSER_NAME() AS CurrentLogin;
 ```
 
 ### Roles Comuns do SQL Server
 
-| Role | Descrição | Permissões Principais |
-|------|-----------|----------------------|
-| **db_owner** | Proprietário do banco | Controle total sobre o banco de dados |
-| **db_ddladmin** | Administrador DDL | CREATE, ALTER, DROP de objetos |
-| **db_datawriter** | Escritor de dados | INSERT, UPDATE, DELETE |
-| **db_datareader** | Leitor de dados | SELECT em todas as tabelas |
-| **db_backupoperator** | Operador de backup | BACKUP DATABASE, BACKUP LOG |
-| **db_securityadmin** | Administrador de segurança | Gerenciar roles e permissões |
+| Role | Permissões Principais |
+|------|----------------------|
+| **db_owner** | Controle total sobre o banco |
+| **db_ddladmin** | CREATE, ALTER, DROP de objetos |
+| **db_datawriter** | INSERT, UPDATE, DELETE |
+| **db_datareader** | SELECT em todas as tabelas |
+| **db_backupoperator** | BACKUP DATABASE, BACKUP LOG |
 
-### Aumentar Permissões (Se Necessário)
+### Exemplo: Permissões com db_owner
 
-#### Para Permitir Backups via T-SQL
+Com a role `db_owner`, o usuário possui:
 
-```sql
--- Conceder permissão de backup ao usuário
-USE master;
-GO
-GRANT BACKUP DATABASE TO [seu_usuario];
-GRANT BACKUP LOG TO [seu_usuario];
-GO
-```
+**✅ Operações de Dados**: SELECT, INSERT, UPDATE, DELETE, EXECUTE  
+**✅ Definição de Estrutura**: CREATE/ALTER/DROP de todos os objetos  
+**✅ Backup**: BACKUP DATABASE e BACKUP LOG (mas MCP não executa)  
+**✅ Administração**: CONTROL, TAKE OWNERSHIP, VIEW DATABASE STATE  
+**✅ Segurança**: Gerenciar máscaras, classificações e criptografia
 
-#### Para Operações de Arquivo (⚠️ Risco de Segurança)
+**Diferença importante**:
+- ✅ **Permissão**: Usuário autorizado para BACKUP DATABASE
+- ❌ **Capacidade MCP**: Interface não acessa sistema de arquivos para salvar .bak
 
-```sql
--- Habilitar xp_cmdshell (use com EXTREMA cautela!)
-EXEC sp_configure 'show advanced options', 1;
-RECONFIGURE;
-EXEC sp_configure 'xp_cmdshell', 1;
-RECONFIGURE;
-```
-
-> ⚠️ **Atenção**: Habilitar `xp_cmdshell` representa riscos significativos de segurança. Use apenas em ambientes controlados e de desenvolvimento.
-
-#### Para Operações DDL Completas
-
-```sql
--- Adicionar usuário ao role db_ddladmin
-USE [seu_banco];
-GO
-ALTER ROLE db_ddladmin ADD MEMBER [seu_usuario];
-GO
-```
-
-#### Para Adicionar Usuário como DB Owner
-
-```sql
--- Adicionar usuário ao role db_owner (controle total)
-USE [seu_banco];
-GO
-ALTER ROLE db_owner ADD MEMBER [seu_usuario];
-GO
-```
-
-## 📊 Exemplo de Análise de Permissões
-
-Abaixo está um exemplo real de análise de permissões de um usuário com role `db_owner`:
-
-### Informações do Usuário
-
-```
-Role: db_owner
-Usuário: dbo (Database Owner)
-```
-
-### Permissões Disponíveis (Resumo)
-
-**Operações de Dados:**
-- ✅ SELECT, INSERT, UPDATE, DELETE
-- ✅ EXECUTE (procedures e functions)
-- ✅ REFERENCES
-
-**Definição de Estrutura:**
-- ✅ CREATE TABLE, VIEW, PROCEDURE, FUNCTION
-- ✅ CREATE SCHEMA, ROLE, USER
-- ✅ ALTER ANY SCHEMA, USER, ROLE
-- ✅ DROP (todos os objetos)
-
-**Backup e Recuperação:**
-- ✅ BACKUP DATABASE
-- ✅ BACKUP LOG
-- ⚠️ Nota: Mesmo com essas permissões, o MCP não consegue executar comandos de backup
-
-**Administração:**
-- ✅ ALTER (modificar banco e objetos)
-- ✅ CONTROL (controle total do banco)
-- ✅ TAKE OWNERSHIP
-- ✅ VIEW DATABASE STATE
-- ✅ KILL DATABASE CONNECTION
-- ✅ CHECKPOINT
-
-**Segurança e Criptografia:**
-- ✅ ALTER ANY MASK / UNMASK
-- ✅ ALTER ANY SENSITIVITY CLASSIFICATION
-- ✅ VIEW ANY SENSITIVITY CLASSIFICATION
-- ✅ CREATE/ALTER CERTIFICATE, SYMMETRIC KEY, ASYMMETRIC KEY
-- ✅ VIEW ANY COLUMN ENCRYPTION KEY DEFINITION
-
-**Recursos Avançados:**
-- ✅ EXECUTE ANY EXTERNAL SCRIPT
-- ✅ ADMINISTER DATABASE BULK OPERATIONS
-- ✅ ALTER LEDGER (tabelas Ledger)
-- ✅ VIEW DATABASE PERFORMANCE STATE
-- ✅ CREATE/ALTER DATABASE AUDIT
-- ✅ SHOWPLAN (ver planos de execução)
-
-### Interpretação
-
-Com a role **db_owner**, o usuário possui:
-
-1. **Controle Total**: Pode executar qualquer operação no banco de dados
-2. **Permissões de Backup**: Possui `BACKUP DATABASE` e `BACKUP LOG`, mas o MCP não consegue executá-los devido à limitação de acesso ao sistema de arquivos
-3. **Administração Completa**: Pode criar, modificar e deletar qualquer objeto
-4. **Segurança**: Pode gerenciar usuários, roles e permissões
-5. **Performance**: Pode visualizar e analisar estado e performance do banco
-
-**Diferença entre Permissão e Capacidade do MCP:**
-- ✅ **Permissão**: O usuário tem autorização para executar `BACKUP DATABASE`
-- ❌ **Capacidade do MCP**: A interface MCP não consegue acessar o sistema de arquivos para salvar o arquivo `.bak`
+---
 
 ## 🔄 Alternativas para Operações Restritas
 
 ### Backup de Dados
 
-Como não é possível criar arquivos `.bak` diretamente através do MCP, utilize estas alternativas:
-
-#### 1. Scripts SQL de INSERT
-
-Melhor para migração entre servidores diferentes:
+#### 1. Scripts SQL (Recomendado para migração)
 
 ```sql
--- Gerar script completo com estrutura e dados
--- Estrutura da tabela
+-- Script completo com estrutura e dados
 CREATE TABLE [dbo].[PEDIDOS](
     [ID_PEDIDO] [int] NOT NULL PRIMARY KEY,
     [ID_CLIENTE] [int] NULL,
-    [ID_PRODUTO] [int] NULL,
-    [DATA_PEDIDO] [datetime] NULL,
-    [DATA_ENTREGA] [date] NULL,
-    [QUANTIDADE] [int] NULL,
     [VALOR_TOTAL] [numeric](18, 0) NULL
 );
 
--- Dados
-INSERT INTO [dbo].[PEDIDOS] VALUES (1, 1, 1, '2023-01-05 14:05:00', '2023-05-22', 10, 200);
--- ... mais linhas
+INSERT INTO [dbo].[PEDIDOS] VALUES (1, 1, 200);
 ```
 
-**Vantagens:**
-- Portável entre diferentes versões do SQL Server
-- Versionável no Git
-- Fácil de revisar e modificar
-- Funciona perfeitamente com o MCP
+**Vantagens**: Portável, versionável no Git, funciona com MCP
 
-#### 2. Exportação para JSON
+#### 2. Exportação JSON
 
 ```sql
--- Exportar dados em formato JSON
 SELECT * FROM tabela
 FOR JSON AUTO, INCLUDE_NULL_VALUES;
 ```
 
-**Vantagens:**
-- Formato universal
-- Fácil de processar em outras linguagens
-- Estruturado e legível
+#### 3. Backup Manual (.bak)
 
-#### 3. Geração de Scripts Completos do Banco
+Execute diretamente no servidor via SSMS ou Azure Data Studio:
 
 ```sql
--- Listar todas as tabelas
-SELECT TABLE_SCHEMA, TABLE_NAME 
-FROM INFORMATION_SCHEMA.TABLES 
-WHERE TABLE_TYPE = 'BASE TABLE';
-
--- Para cada tabela, gerar CREATE TABLE e INSERT statements
-```
-
-#### 4. Backup Manual no Servidor
-
-Para backups binários completos (`.bak`), execute diretamente no servidor via SSMS, Azure Data Studio ou T-SQL:
-
-```sql
--- Execute este comando diretamente no SQL Server (não via MCP)
 BACKUP DATABASE [NomeDoBanco] 
 TO DISK = 'C:\Backups\NomeDoBanco.bak'
-WITH FORMAT, 
-     MEDIANAME = 'SQLServerBackups',
-     NAME = 'Full Backup of NomeDoBanco',
-     COMPRESSION;
-GO
-
--- Verificar o backup
-RESTORE VERIFYONLY 
-FROM DISK = 'C:\Backups\NomeDoBanco.bak';
+WITH COMPRESSION;
 ```
 
-### Operações de Sistema
+### Outras Ferramentas
 
-Para configurações de sistema e jobs agendados:
-- Use SQL Server Management Studio (SSMS)
-- Utilize Azure Data Studio
-- Acesse diretamente o servidor via RDP ou console
-- Use PowerShell com módulo SqlServer
+**Para grandes volumes**:
+- BCP (Bulk Copy Program)
+- SQL Server Import/Export Wizard
+- SSIS, Azure Data Factory
 
-### Transferência de Arquivos
+---
 
-Para importar/exportar grandes volumes de dados:
-- Use BCP (Bulk Copy Program)
-- Use SQL Server Import/Export Wizard
-- Use ferramentas ETL como SSIS
-- Use Azure Data Factory (para Azure SQL)
+## 📊 Casos de Uso
 
-## 📊 Casos de Uso Ideais
+### ✅ Ideal para:
+- Análise exploratória de dados
+- Consultas ad-hoc e relatórios
+- Modificações de dados (DML)
+- Criação e manutenção de estruturas (DDL)
+- Extração de dados para migração
+- Análise de performance
+- Prototipagem e desenvolvimento
 
-O MCP SQL Server é ideal para:
+### ❌ Não recomendado para:
+- Backups binários completos
+- Operações com sistema de arquivos
+- Configurações de servidor
+- Operações > 15 segundos
+- Agendamento de jobs
 
-- ✅ Análise exploratória de dados
-- ✅ Consultas ad-hoc e relatórios
-- ✅ Modificações de dados (INSERT, UPDATE, DELETE)
-- ✅ Criação e manutenção de estruturas (DDL)
-- ✅ Extração de dados para migração
-- ✅ Análise de performance e otimização
-- ✅ Geração de scripts de banco de dados
-- ✅ Verificação de permissões e metadata
-- ✅ Prototipagem e desenvolvimento
-
-## 🚫 Não Recomendado Para
-
-- ❌ Backups binários completos do banco (use SSMS ou scripts diretos)
-- ❌ Operações que requerem acesso ao sistema de arquivos
-- ❌ Configurações avançadas de servidor
-- ❌ Gerenciamento de infraestrutura
-- ❌ Operações que exigem mais de 15 segundos
-- ❌ Importação/exportação de arquivos grandes
-- ❌ Agendamento de jobs
-
-## 💡 Dicas e Boas Práticas
-
-### Para Migração de Dados
-
-1. **Use scripts SQL**: Mais portável e versionável
-2. **Teste em ambiente de desenvolvimento primeiro**
-3. **Faça backup antes de modificações**: Use SSMS para criar `.bak`
-4. **Divida operações grandes**: Evite timeout de 15 segundos
-5. **Use transações**: Garanta integridade dos dados
-
-### Para Análise de Permissões
-
-1. **Sempre verifique permissões antes de operações críticas**
-2. **Documente as permissões necessárias para cada operação**
-3. **Use o princípio do menor privilégio**
-4. **Revise permissões periodicamente**
-
-### Para Performance
-
-1. **Use índices apropriados**
-2. **Analise planos de execução**: Use `SET STATISTICS IO, TIME ON`
-3. **Evite SELECT * em tabelas grandes**
-4. **Use paginação para grandes resultados**
-
-## 📝 Notas Adicionais
-
-- O MCP conecta-se via TCP/IP na porta padrão 1433
-- Requer credenciais válidas de SQL Server Authentication ou Windows Authentication
-- Todas as operações respeitam as permissões configuradas para o usuário
-- Transações são suportadas e devem ser usadas para garantir integridade dos dados
-- O timeout padrão é de 15 segundos por consulta
-- Não há limite de queries sequenciais, mas cada uma deve completar em 15 segundos
+---
 
 ## 🔍 Troubleshooting
 
 ### Erro de Timeout
-
 ```
-ERRO DE CONEXÃO: Failed to connect in 15000ms
+ERRO: Failed to connect in 15000ms
 ```
 
-**Soluções:**
+**Soluções**:
 - Verifique se o servidor está online
 - Confirme que a porta 1433 está acessível
 - Verifique configurações de firewall
 - Teste conectividade de rede
 
 ### Erro de Permissão
-
 ```
-The user does not have permission to perform this action
+The user does not have permission
 ```
 
-**Soluções:**
-- Verifique permissões com `fn_my_permissions`
+**Soluções**:
+- Verifique permissões: `SELECT * FROM fn_my_permissions(NULL, 'DATABASE')`
 - Verifique roles do usuário
-- Solicite permissões adequadas ao DBA
+- Solicite permissões ao DBA
 - Use conta com privilégios apropriados
 
-### Query Muito Lenta
+### Query Lenta
 
-**Soluções:**
-- Adicione filtros WHERE para reduzir dados
+**Soluções**:
+- Adicione filtros WHERE
 - Use índices apropriados
-- Divida query em partes menores
-- Analise plano de execução
-
-
-## 🤝 Contribuições
-
-Sinta-se à vontade para contribuir com este documento reportando limitações adicionais ou sugerindo melhorias.
+- Divida query em partes menores (< 15s)
+- Analise plano de execução: `SET STATISTICS IO, TIME ON`
 
 ---
 
+## 💡 Boas Práticas
 
-📞 Contato
-Alexandre
-alemiti@gmail.com
-😊
+### Migração de Dados
+1. Use scripts SQL (mais portável)
+2. Teste em desenvolvimento primeiro
+3. Faça backup antes de modificações
+4. Divida operações grandes (< 15s)
+5. Use transações para integridade
+
+### Performance
+1. Use índices apropriados
+2. Analise planos de execução
+3. Evite SELECT * em tabelas grandes
+4. Use paginação para grandes resultados
+
+### Segurança
+1. Verifique permissões antes de operações críticas
+2. Use o princípio do menor privilégio
+3. Documente permissões necessárias
+4. Revise permissões periodicamente
+
+---
+
+## 🤝 Contribuições
+
+Contribuições são bem-vindas! Reporte limitações adicionais ou sugira melhorias.
+
+---
+
+## 📞 Contato
+
+**Alexandre**  
+📧 alemiti@gmail.com
 
 ---

@@ -1,8 +1,9 @@
 
 # 🚀 MCP SQL Server: Integre o Claude Desktop ao seu Banco de Dados
 -- Claude SQL Bridge: Guia Definitivo para macOS & Windows
-Última atualização: Dezembro 2025
-Versão do SQL Server testada: Microsoft SQL Server 2025 (RTM) Enterprise Developer Edition
+
+## Última atualização: Dezembro 2025
+## Versão do SQL Server testada: Microsoft SQL Server 2025 (RTM) Enterprise Developer Edition
 
 
 Este guia fornece o passo a passo unificado para configurar o **Model Context Protocol (MCP)**, permitindo que o Claude Desktop execute consultas SQL diretamente em instâncias do **Microsoft SQL Server**.

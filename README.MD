@@ -108,13 +108,14 @@ open ~/Library/Logs/Claude
 
 # Limitações do MCP SQL Server
 
-Limitações do Model Context Protocol (MCP) ao conectar-se com SQL Server através do Claude AI.
+Este documento descreve as capacidades e limitações do Model Context Protocol (MCP) ao conectar-se com SQL Server através do Claude AI.
 
 ## 📋 Índice
 
 - [Operações Suportadas](#operações-suportadas)
 - [Limitações](#limitações)
 - [Permissões e Segurança](#permissões-e-segurança)
+- [Exemplo de Análise de Permissões](#exemplo-de-análise-de-permissões)
 - [Alternativas para Operações Restritas](#alternativas-para-operações-restritas)
 
 ## ✅ Operações Suportadas
@@ -158,13 +159,15 @@ Limitações do Model Context Protocol (MCP) ao conectar-se com SQL Server atrav
 ### 1. Operações de Arquivo
 
 **Não suportado:**
-- `BACKUP DATABASE` / `RESTORE DATABASE`
+- `BACKUP DATABASE` / `RESTORE DATABASE` ⚠️ (mesmo com permissões adequadas)
 - Acesso ao sistema de arquivos do servidor
 - Comandos como `xp_cmdshell`
 - `OPENROWSET` com arquivos
 - Criação ou leitura de arquivos `.bak`, `.csv`, `.txt` no servidor
 - `BULK INSERT` de arquivos externos
 - Importação/exportação de dados para arquivos físicos
+
+> **Nota Importante**: Mesmo que o usuário possua as permissões `BACKUP DATABASE` e `BACKUP LOG`, o MCP não consegue executar comandos de backup porque eles requerem acesso ao sistema de arquivos do servidor, o que é uma **limitação da interface MCP**, não das permissões do usuário.
 
 ### 2. Operações de Sistema
 
@@ -207,7 +210,21 @@ FROM sys.database_role_members AS drm
 JOIN sys.database_principals AS r ON drm.role_principal_id = r.principal_id
 JOIN sys.database_principals AS m ON drm.member_principal_id = m.principal_id
 WHERE m.name = USER_NAME();
+
+-- Ver o usuário atual
+SELECT USER_NAME() AS CurrentUser, SUSER_NAME() AS CurrentLogin;
 ```
+
+### Roles Comuns do SQL Server
+
+| Role | Descrição | Permissões Principais |
+|------|-----------|----------------------|
+| **db_owner** | Proprietário do banco | Controle total sobre o banco de dados |
+| **db_ddladmin** | Administrador DDL | CREATE, ALTER, DROP de objetos |
+| **db_datawriter** | Escritor de dados | INSERT, UPDATE, DELETE |
+| **db_datareader** | Leitor de dados | SELECT em todas as tabelas |
+| **db_backupoperator** | Operador de backup | BACKUP DATABASE, BACKUP LOG |
+| **db_securityadmin** | Administrador de segurança | Gerenciar roles e permissões |
 
 ### Aumentar Permissões (Se Necessário)
 
@@ -244,6 +261,82 @@ ALTER ROLE db_ddladmin ADD MEMBER [seu_usuario];
 GO
 ```
 
+#### Para Adicionar Usuário como DB Owner
+
+```sql
+-- Adicionar usuário ao role db_owner (controle total)
+USE [seu_banco];
+GO
+ALTER ROLE db_owner ADD MEMBER [seu_usuario];
+GO
+```
+
+## 📊 Exemplo de Análise de Permissões
+
+Abaixo está um exemplo real de análise de permissões de um usuário com role `db_owner`:
+
+### Informações do Usuário
+
+```
+Role: db_owner
+Usuário: dbo (Database Owner)
+```
+
+### Permissões Disponíveis (Resumo)
+
+**Operações de Dados:**
+- ✅ SELECT, INSERT, UPDATE, DELETE
+- ✅ EXECUTE (procedures e functions)
+- ✅ REFERENCES
+
+**Definição de Estrutura:**
+- ✅ CREATE TABLE, VIEW, PROCEDURE, FUNCTION
+- ✅ CREATE SCHEMA, ROLE, USER
+- ✅ ALTER ANY SCHEMA, USER, ROLE
+- ✅ DROP (todos os objetos)
+
+**Backup e Recuperação:**
+- ✅ BACKUP DATABASE
+- ✅ BACKUP LOG
+- ⚠️ Nota: Mesmo com essas permissões, o MCP não consegue executar comandos de backup
+
+**Administração:**
+- ✅ ALTER (modificar banco e objetos)
+- ✅ CONTROL (controle total do banco)
+- ✅ TAKE OWNERSHIP
+- ✅ VIEW DATABASE STATE
+- ✅ KILL DATABASE CONNECTION
+- ✅ CHECKPOINT
+
+**Segurança e Criptografia:**
+- ✅ ALTER ANY MASK / UNMASK
+- ✅ ALTER ANY SENSITIVITY CLASSIFICATION
+- ✅ VIEW ANY SENSITIVITY CLASSIFICATION
+- ✅ CREATE/ALTER CERTIFICATE, SYMMETRIC KEY, ASYMMETRIC KEY
+- ✅ VIEW ANY COLUMN ENCRYPTION KEY DEFINITION
+
+**Recursos Avançados:**
+- ✅ EXECUTE ANY EXTERNAL SCRIPT
+- ✅ ADMINISTER DATABASE BULK OPERATIONS
+- ✅ ALTER LEDGER (tabelas Ledger)
+- ✅ VIEW DATABASE PERFORMANCE STATE
+- ✅ CREATE/ALTER DATABASE AUDIT
+- ✅ SHOWPLAN (ver planos de execução)
+
+### Interpretação
+
+Com a role **db_owner**, o usuário possui:
+
+1. **Controle Total**: Pode executar qualquer operação no banco de dados
+2. **Permissões de Backup**: Possui `BACKUP DATABASE` e `BACKUP LOG`, mas o MCP não consegue executá-los devido à limitação de acesso ao sistema de arquivos
+3. **Administração Completa**: Pode criar, modificar e deletar qualquer objeto
+4. **Segurança**: Pode gerenciar usuários, roles e permissões
+5. **Performance**: Pode visualizar e analisar estado e performance do banco
+
+**Diferença entre Permissão e Capacidade do MCP:**
+- ✅ **Permissão**: O usuário tem autorização para executar `BACKUP DATABASE`
+- ❌ **Capacidade do MCP**: A interface MCP não consegue acessar o sistema de arquivos para salvar o arquivo `.bak`
+
 ## 🔄 Alternativas para Operações Restritas
 
 ### Backup de Dados
@@ -256,13 +349,27 @@ Melhor para migração entre servidores diferentes:
 
 ```sql
 -- Gerar script completo com estrutura e dados
--- (ideal para versionamento e migração)
+-- Estrutura da tabela
+CREATE TABLE [dbo].[PEDIDOS](
+    [ID_PEDIDO] [int] NOT NULL PRIMARY KEY,
+    [ID_CLIENTE] [int] NULL,
+    [ID_PRODUTO] [int] NULL,
+    [DATA_PEDIDO] [datetime] NULL,
+    [DATA_ENTREGA] [date] NULL,
+    [QUANTIDADE] [int] NULL,
+    [VALOR_TOTAL] [numeric](18, 0) NULL
+);
+
+-- Dados
+INSERT INTO [dbo].[PEDIDOS] VALUES (1, 1, 1, '2023-01-05 14:05:00', '2023-05-22', 10, 200);
+-- ... mais linhas
 ```
 
 **Vantagens:**
 - Portável entre diferentes versões do SQL Server
 - Versionável no Git
 - Fácil de revisar e modificar
+- Funciona perfeitamente com o MCP
 
 #### 2. Exportação para JSON
 
@@ -272,20 +379,39 @@ SELECT * FROM tabela
 FOR JSON AUTO, INCLUDE_NULL_VALUES;
 ```
 
-#### 3. Exportação para CSV (via código)
+**Vantagens:**
+- Formato universal
+- Fácil de processar em outras linguagens
+- Estruturado e legível
 
-Processar resultados e formatar como CSV através de scripts.
+#### 3. Geração de Scripts Completos do Banco
+
+```sql
+-- Listar todas as tabelas
+SELECT TABLE_SCHEMA, TABLE_NAME 
+FROM INFORMATION_SCHEMA.TABLES 
+WHERE TABLE_TYPE = 'BASE TABLE';
+
+-- Para cada tabela, gerar CREATE TABLE e INSERT statements
+```
 
 #### 4. Backup Manual no Servidor
 
-Para backups binários completos (`.bak`), execute diretamente no servidor:
+Para backups binários completos (`.bak`), execute diretamente no servidor via SSMS, Azure Data Studio ou T-SQL:
 
 ```sql
+-- Execute este comando diretamente no SQL Server (não via MCP)
 BACKUP DATABASE [NomeDoBanco] 
 TO DISK = 'C:\Backups\NomeDoBanco.bak'
 WITH FORMAT, 
      MEDIANAME = 'SQLServerBackups',
-     NAME = 'Full Backup';
+     NAME = 'Full Backup of NomeDoBanco',
+     COMPRESSION;
+GO
+
+-- Verificar o backup
+RESTORE VERIFYONLY 
+FROM DISK = 'C:\Backups\NomeDoBanco.bak';
 ```
 
 ### Operações de Sistema
@@ -294,6 +420,15 @@ Para configurações de sistema e jobs agendados:
 - Use SQL Server Management Studio (SSMS)
 - Utilize Azure Data Studio
 - Acesse diretamente o servidor via RDP ou console
+- Use PowerShell com módulo SqlServer
+
+### Transferência de Arquivos
+
+Para importar/exportar grandes volumes de dados:
+- Use BCP (Bulk Copy Program)
+- Use SQL Server Import/Export Wizard
+- Use ferramentas ETL como SSIS
+- Use Azure Data Factory (para Azure SQL)
 
 ## 📊 Casos de Uso Ideais
 
@@ -306,14 +441,42 @@ O MCP SQL Server é ideal para:
 - ✅ Extração de dados para migração
 - ✅ Análise de performance e otimização
 - ✅ Geração de scripts de banco de dados
+- ✅ Verificação de permissões e metadata
+- ✅ Prototipagem e desenvolvimento
 
 ## 🚫 Não Recomendado Para
 
-- ❌ Backups binários completos do banco
+- ❌ Backups binários completos do banco (use SSMS ou scripts diretos)
 - ❌ Operações que requerem acesso ao sistema de arquivos
 - ❌ Configurações avançadas de servidor
 - ❌ Gerenciamento de infraestrutura
 - ❌ Operações que exigem mais de 15 segundos
+- ❌ Importação/exportação de arquivos grandes
+- ❌ Agendamento de jobs
+
+## 💡 Dicas e Boas Práticas
+
+### Para Migração de Dados
+
+1. **Use scripts SQL**: Mais portável e versionável
+2. **Teste em ambiente de desenvolvimento primeiro**
+3. **Faça backup antes de modificações**: Use SSMS para criar `.bak`
+4. **Divida operações grandes**: Evite timeout de 15 segundos
+5. **Use transações**: Garanta integridade dos dados
+
+### Para Análise de Permissões
+
+1. **Sempre verifique permissões antes de operações críticas**
+2. **Documente as permissões necessárias para cada operação**
+3. **Use o princípio do menor privilégio**
+4. **Revise permissões periodicamente**
+
+### Para Performance
+
+1. **Use índices apropriados**
+2. **Analise planos de execução**: Use `SET STATISTICS IO, TIME ON`
+3. **Evite SELECT * em tabelas grandes**
+4. **Use paginação para grandes resultados**
 
 ## 📝 Notas Adicionais
 
@@ -321,6 +484,43 @@ O MCP SQL Server é ideal para:
 - Requer credenciais válidas de SQL Server Authentication ou Windows Authentication
 - Todas as operações respeitam as permissões configuradas para o usuário
 - Transações são suportadas e devem ser usadas para garantir integridade dos dados
+- O timeout padrão é de 15 segundos por consulta
+- Não há limite de queries sequenciais, mas cada uma deve completar em 15 segundos
+
+## 🔍 Troubleshooting
+
+### Erro de Timeout
+
+```
+ERRO DE CONEXÃO: Failed to connect in 15000ms
+```
+
+**Soluções:**
+- Verifique se o servidor está online
+- Confirme que a porta 1433 está acessível
+- Verifique configurações de firewall
+- Teste conectividade de rede
+
+### Erro de Permissão
+
+```
+The user does not have permission to perform this action
+```
+
+**Soluções:**
+- Verifique permissões com `fn_my_permissions`
+- Verifique roles do usuário
+- Solicite permissões adequadas ao DBA
+- Use conta com privilégios apropriados
+
+### Query Muito Lenta
+
+**Soluções:**
+- Adicione filtros WHERE para reduzir dados
+- Use índices apropriados
+- Divida query em partes menores
+- Analise plano de execução
+
 
 ## 🤝 Contribuições
 

@@ -74,13 +74,12 @@ npm install -g @modelcontextprotocol/server-mssql
 ```json
 {
   "mcpServers": {
-    "sql-server": {
-      "command": "node",
-      "args": [
-        "C:/Users/SEU_USUARIO/AppData/Roaming/npm/node_modules/@modelcontextprotocol/server-mssql/dist/index.js"
-      ],
+    "mcp-sql-server": {
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sqlserver"],
       "env": {
-        "MSSQL_CONNECTION_STRING": "Server=SEU_IP,1433;Database=NOME_BANCO;User Id=sa;Password=SUA_SENHA;Encrypt=true;TrustServerCertificate=true;"
+        "SQL_CONNECTION_STRING": "SUA_STRING_AQUI",
+        "TZ": "America/Sao_Paulo"
       }
     }
   }

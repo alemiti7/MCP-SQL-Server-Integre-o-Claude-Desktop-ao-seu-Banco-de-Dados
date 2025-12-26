@@ -34,9 +34,6 @@ Aqui está a tradução dos requisitos de sistema para o português:
 
 ---
 
-Gostaria que eu explicasse como verificar se o seu computador atende a esses requisitos ou como instalar o ambiente Node.js?
-
-
 Este guia fornece o passo a passo para configurar o **Model Context Protocol (MCP)**, permitindo que o Claude Desktop execute consultas SQL diretamente em instâncias do **Microsoft SQL Server**.
 
 ---

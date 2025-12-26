@@ -25,11 +25,12 @@
 
 ---
 
-### **Requisitos do Ambiente de Desenvolvimento (para servidores MCP)**
+## 🎯 Pré-requisitos do Ambiente de Desenvolvimento
 
-* **Ambiente:** Node.js
-* **Gerenciador de pacotes:** NPM
-
+- **Claude Desktop** instalado
+- **Node.js (v18+)** instalado
+- **SQL Server** acessível (local, Docker ou remoto)
+- **Porta 1433** aberta no firewall
 ---
 
 Este guia fornece o passo a passo para configurar o **Model Context Protocol (MCP)**, permitindo que o Claude Desktop execute consultas SQL diretamente em instâncias do **Microsoft SQL Server**.
@@ -48,15 +49,6 @@ Este guia fornece o passo a passo para configurar o **Model Context Protocol (MC
 - [Alternativas para Operações Restritas](#-alternativas-para-operações-restritas)
 - [Troubleshooting](#-troubleshooting)
 - [Contato](#-contato)
-
----
-
-## 🎯 Pré-requisitos
-
-- **Claude Desktop** instalado
-- **Node.js (v18+)** instalado
-- **SQL Server** acessível (local, Docker ou remoto)
-- **Porta 1433** aberta no firewall
 
 ---
 

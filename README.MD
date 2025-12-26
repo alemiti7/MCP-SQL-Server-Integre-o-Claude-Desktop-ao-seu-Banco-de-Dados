@@ -9,8 +9,8 @@ Documentação técnica para a integração do Claude Desktop com instâncias Mi
 - [Instalação](#instalação)
 - [Configuração](#Configuração)
 - [Limitações](#Limitações)
-- [Contribuição](#Contribuição)
 - [Licença](#Licença)
+- [Contribuição](#Contribuição)
 - [Contato](#Contato)
 
 ## Funcionalidades
@@ -79,13 +79,13 @@ O arquivo `claude_desktop_config.json` deve ser editado nos seguintes diretório
 * **Timeout**: Limite operacional de 15 segundos por requisição.
 * **Administração de Sistema**: Operações de configuração global (`sp_configure`) e gerenciamento de jobs via SQL Server Agent não são suportadas.
 
-## Contribuição
-
-Para propor melhorias ou relatar inconsistências técnicas, utilize o sistema de issues ou envie um Pull Request seguindo os padrões de código do projeto.
-
 ## Licença
 
 Este projeto segue os termos de licenciamento padrão para conectores MCP. Para detalhes sobre uso e distribuição, consulte a licença no repositório oficial.
+
+## Contribuição
+
+Para propor melhorias ou relatar inconsistências técnicas, utilize o sistema de issues ou envie um Pull Request seguindo os padrões de código do projeto.
 
 ---
 ## Contato

@@ -5,6 +5,38 @@
 **Última atualização**: Dezembro 2025  
 **SQL Server testado**: Microsoft SQL Server 2025 (RTM) Enterprise Developer Edition
 
+Aqui está a tradução dos requisitos de sistema para o português:
+
+---
+
+## **Requisitos de Sistema**
+
+### **Windows**
+
+* **Sistema Operacional:** Windows 10 ou mais recente (64 bits)
+* **Memória RAM:** 4 GB (8 GB ou mais recomendado)
+* **Armazenamento:** 500 MB de espaço disponível
+* **Internet:** Conexão de banda larga
+
+### **macOS**
+
+* **Sistema Operacional:** macOS 11 (Big Sur) ou mais recente
+* **Memória RAM:** 4 GB (8 GB ou mais recomendado)
+* **Armazenamento:** 500 MB de espaço disponível
+* **Internet:** Conexão de banda larga
+
+---
+
+### **Requisitos do Ambiente de Desenvolvimento (para servidores MCP)**
+
+* **Ambiente:** Node.js
+* **Gerenciador de pacotes:** NPM
+
+---
+
+Gostaria que eu explicasse como verificar se o seu computador atende a esses requisitos ou como instalar o ambiente Node.js?
+
+
 Este guia fornece o passo a passo para configurar o **Model Context Protocol (MCP)**, permitindo que o Claude Desktop execute consultas SQL diretamente em instâncias do **Microsoft SQL Server**.
 
 ---
